@@ -221,12 +221,12 @@ public class LinearLayoutCompat extends ViewGroup {
     }
 
     void drawDividersHorizontal(Canvas canvas) {
-        int position;
         int count = getVirtualChildCount();
         boolean isLayoutRtl = ViewUtils.isLayoutRtl(this);
         int i = SHOW_DIVIDER_NONE;
         while (i < count) {
             LayoutParams lp;
+            int position;
             View child = getVirtualChildAt(i);
             if (!(child == null || child.getVisibility() == 8 || !hasDividerBeforeChildAt(i))) {
                 lp = (LayoutParams) child.getLayoutParams();
@@ -377,6 +377,7 @@ public class LinearLayoutCompat extends ViewGroup {
 
     void measureVertical(int widthMeasureSpec, int heightMeasureSpec) {
         LayoutParams lp;
+        int totalLength;
         this.mTotalLength = SHOW_DIVIDER_NONE;
         int maxWidth = SHOW_DIVIDER_NONE;
         int childState = SHOW_DIVIDER_NONE;
@@ -394,7 +395,6 @@ public class LinearLayoutCompat extends ViewGroup {
         int largestChildHeight = ExploreByTouchHelper.INVALID_ID;
         int i = SHOW_DIVIDER_NONE;
         while (i < count) {
-            int totalLength;
             int childHeight;
             boolean matchWidthLocally;
             int margin;
@@ -571,10 +571,6 @@ public class LinearLayoutCompat extends ViewGroup {
     }
 
     void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec) {
-        int totalLength;
-        int childWidth;
-        int childBaseline;
-        int i;
         this.mTotalLength = SHOW_DIVIDER_NONE;
         int maxHeight = SHOW_DIVIDER_NONE;
         int childState = SHOW_DIVIDER_NONE;
@@ -605,19 +601,23 @@ public class LinearLayoutCompat extends ViewGroup {
         boolean useLargestChild = this.mUseLargestChild;
         boolean isExactly = widthMode == 1073741824;
         int largestChildWidth = ExploreByTouchHelper.INVALID_ID;
-        int i2 = SHOW_DIVIDER_NONE;
-        while (i2 < count) {
+        int i = SHOW_DIVIDER_NONE;
+        while (i < count) {
             LayoutParams lp;
+            int totalLength;
+            int childWidth;
             boolean matchHeightLocally;
             int margin;
             int childHeight;
-            View child = getVirtualChildAt(i2);
+            int childBaseline;
+            int i2;
+            View child = getVirtualChildAt(i);
             if (child == null) {
-                this.mTotalLength += measureNullChild(i2);
+                this.mTotalLength += measureNullChild(i);
             } else if (child.getVisibility() == 8) {
-                i2 += getChildrenSkipCount(child, i2);
+                i += getChildrenSkipCount(child, i);
             } else {
-                if (hasDividerBeforeChildAt(i2)) {
+                if (hasDividerBeforeChildAt(i)) {
                     this.mTotalLength += this.mDividerWidth;
                 }
                 lp = (LayoutParams) child.getLayoutParams();
@@ -641,7 +641,7 @@ public class LinearLayoutCompat extends ViewGroup {
                         oldWidth = SHOW_DIVIDER_NONE;
                         lp.width = -2;
                     }
-                    measureChildBeforeLayout(child, i2, widthMeasureSpec, totalWeight == 0.0f ? this.mTotalLength : SHOW_DIVIDER_NONE, heightMeasureSpec, SHOW_DIVIDER_NONE);
+                    measureChildBeforeLayout(child, i, widthMeasureSpec, totalWeight == 0.0f ? this.mTotalLength : SHOW_DIVIDER_NONE, heightMeasureSpec, SHOW_DIVIDER_NONE);
                     if (oldWidth != Integer.MIN_VALUE) {
                         lp.width = oldWidth;
                     }
@@ -668,11 +668,11 @@ public class LinearLayoutCompat extends ViewGroup {
                     childBaseline = child.getBaseline();
                     if (childBaseline != -1) {
                         if (lp.gravity < 0) {
-                            i = this.mGravity;
+                            i2 = this.mGravity;
                         } else {
-                            i = lp.gravity;
+                            i2 = lp.gravity;
                         }
-                        int index = (((i & 112) >> VERTICAL_GRAVITY_COUNT) & -2) >> VERTICAL;
+                        int index = (((i2 & 112) >> VERTICAL_GRAVITY_COUNT) & -2) >> VERTICAL;
                         maxAscent[index] = Math.max(maxAscent[index], childBaseline);
                         maxDescent[index] = Math.max(maxDescent[index], childHeight - childBaseline);
                     }
@@ -690,9 +690,9 @@ public class LinearLayoutCompat extends ViewGroup {
                     }
                     alternativeMaxHeight = Math.max(alternativeMaxHeight, margin);
                 }
-                i2 += getChildrenSkipCount(child, i2);
+                i += getChildrenSkipCount(child, i);
             }
-            i2 += VERTICAL;
+            i += VERTICAL;
         }
         if (this.mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
             this.mTotalLength += this.mDividerWidth;
@@ -702,13 +702,13 @@ public class LinearLayoutCompat extends ViewGroup {
         }
         if (useLargestChild && (widthMode == Integer.MIN_VALUE || widthMode == 0)) {
             this.mTotalLength = SHOW_DIVIDER_NONE;
-            i2 = SHOW_DIVIDER_NONE;
-            while (i2 < count) {
-                child = getVirtualChildAt(i2);
+            i = SHOW_DIVIDER_NONE;
+            while (i < count) {
+                child = getVirtualChildAt(i);
                 if (child == null) {
-                    this.mTotalLength += measureNullChild(i2);
+                    this.mTotalLength += measureNullChild(i);
                 } else if (child.getVisibility() == 8) {
-                    i2 += getChildrenSkipCount(child, i2);
+                    i += getChildrenSkipCount(child, i);
                 } else {
                     lp = (LayoutParams) child.getLayoutParams();
                     if (isExactly) {
@@ -718,7 +718,7 @@ public class LinearLayoutCompat extends ViewGroup {
                         this.mTotalLength = Math.max(totalLength, (((totalLength + largestChildWidth) + lp.leftMargin) + lp.rightMargin) + getNextLocationOffset(child));
                     }
                 }
-                i2 += VERTICAL;
+                i += VERTICAL;
             }
         }
         this.mTotalLength += getPaddingLeft() + getPaddingRight();
@@ -741,8 +741,8 @@ public class LinearLayoutCompat extends ViewGroup {
             maxDescent[SHOW_DIVIDER_NONE] = -1;
             maxHeight = -1;
             this.mTotalLength = SHOW_DIVIDER_NONE;
-            for (i2 = SHOW_DIVIDER_NONE; i2 < count; i2 += VERTICAL) {
-                child = getVirtualChildAt(i2);
+            for (i = SHOW_DIVIDER_NONE; i < count; i += VERTICAL) {
+                child = getVirtualChildAt(i);
                 if (!(child == null || child.getVisibility() == 8)) {
                     lp = (LayoutParams) child.getLayoutParams();
                     float childExtra = lp.weight;
@@ -784,11 +784,11 @@ public class LinearLayoutCompat extends ViewGroup {
                         childBaseline = child.getBaseline();
                         if (childBaseline != -1) {
                             if (lp.gravity < 0) {
-                                i = this.mGravity;
+                                i2 = this.mGravity;
                             } else {
-                                i = lp.gravity;
+                                i2 = lp.gravity;
                             }
-                            index = (((i & 112) >> VERTICAL_GRAVITY_COUNT) & -2) >> VERTICAL;
+                            index = (((i2 & 112) >> VERTICAL_GRAVITY_COUNT) & -2) >> VERTICAL;
                             maxAscent[index] = Math.max(maxAscent[index], childBaseline);
                             maxDescent[index] = Math.max(maxDescent[index], childHeight - childBaseline);
                         }
@@ -802,8 +802,8 @@ public class LinearLayoutCompat extends ViewGroup {
         } else {
             alternativeMaxHeight = Math.max(alternativeMaxHeight, weightedMaxHeight);
             if (useLargestChild && widthMode != 1073741824) {
-                for (i2 = SHOW_DIVIDER_NONE; i2 < count; i2 += VERTICAL) {
-                    child = getVirtualChildAt(i2);
+                for (i = SHOW_DIVIDER_NONE; i < count; i += VERTICAL) {
+                    child = getVirtualChildAt(i);
                     if (!(child == null || child.getVisibility() == 8)) {
                         if (((LayoutParams) child.getLayoutParams()).weight > 0.0f) {
                             child.measure(MeasureSpec.makeMeasureSpec(largestChildWidth, 1073741824), MeasureSpec.makeMeasureSpec(child.getMeasuredHeight(), 1073741824));

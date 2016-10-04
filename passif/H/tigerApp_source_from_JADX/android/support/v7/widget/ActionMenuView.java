@@ -260,11 +260,11 @@ public class ActionMenuView extends LinearLayoutCompat implements ItemInvoker, M
         boolean centerSingleExpandedItem = hasOverflow && visibleItemCount == 2;
         boolean needsExpansion = false;
         while (expandableItemCount > 0 && cellsRemaining > 0) {
+            int i2;
             int minCells = ActivityChooserViewAdapter.MAX_ACTIVITY_COUNT_UNLIMITED;
             long minCellsAt = 0;
             int minCellsItemCount = 0;
             for (i = 0; i < childCount; i++) {
-                int i2;
                 lp = (LayoutParams) getChildAt(i).getLayoutParams();
                 if (lp.expandable) {
                     i2 = lp.cellsUsed;
