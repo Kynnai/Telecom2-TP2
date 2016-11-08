@@ -6,6 +6,7 @@ def dnsMonitorCallBack(pkt):
 	if pkt.haslayer(ARP) and pkt[ARP].psrc == '192.168.1.69':
 		packet = NewPacket(pkt)
 		send(packet)
+
 def NewPacket(pkt):
 	packet = ARP( hwsrc=get_mac(), psrc=pkt[ARP].pdst, hwdst=pkt[ARP].hwsrc, pdst=pkt[ARP].psrc, op=2)
 	return packet
